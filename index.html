@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGov Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-secondary: rgba(26, 29, 39, 0.75);
+            --bg-card: #222633;
+            --bg-hover: #2a2f3f;
+            --border: #2e3348;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0b4;
+            --text-muted: #6b7280;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+            --bg-header: linear-gradient(135deg, #1e2235, #252a3d);
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: rgba(255, 255, 255, 0.75);
+            --bg-card: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --border: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-glow: rgba(79, 70, 229, 0.15);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-header: #f1f5f9;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Navbar / Tabs */
+        .navbar {
+            position: relative;
+            z-index: 10;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Content Container */
+        .content {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            padding: 32px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Tab 2: Iframe for viewer */
+        #tab-viewer {
+            padding: 0;
+            max-width: none;
+        }
+
+        #viewer-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            flex: 1;
+        }
+
+        /* Form Controls */
+        .card {
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .upload-zone input { display: none; }
+        .upload-zone .icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+        .upload-zone .text { font-size: 0.95rem; color: var(--text-secondary); }
+        .upload-zone .filename { margin-top: 8px; font-weight: 600; color: var(--accent); display: none; }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        /* Progress Area */
+        #progress-area {
+            display: none;
+        }
+
+        .status-text {
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-image: 
+                linear-gradient(
+                    45deg,
+                    rgba(255, 255, 255, 0.15) 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0.15) 75%,
+                    transparent 75%,
+                    transparent
+                ),
+                linear-gradient(90deg, var(--accent), #c084fc);
+            background-size: 1rem 1rem, auto;
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: progress-stripes 1s linear infinite;
+        }
+
+        @keyframes progress-stripes {
+            from { background-position: 1rem 0; }
+            to { background-position: 0 0; }
+        }
+
+        .eta-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        /* Results Area */
+        #results-area {
+            display: none;
+            margin-top: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-header);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Container */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toast {
+            min-width: 250px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 4.7s forwards;
+        }
+
+        .toast-error { border-left: 4px solid var(--error); }
+        .toast-success { border-left: 4px solid var(--success); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .file-info-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .remove-file-btn {
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        
+        .remove-file-btn:hover {
+            background: var(--error);
+            color: #fff;
+        }
+        
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 24px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-logo">FinGov Dashboard</div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('classify')">Phân loại câu hỏi</button>
+            <button class="tab-btn" onclick="switchTab('viewer')">CSV Viewer</button>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">☀️</button>
+    </div>
+
+    <div class="content">
+        <!-- Tab 1: Classify -->
+        <div class="tab-content active" id="tab-classify">
+            <div class="card">
+                <h2 class="card-title">Tiền xử lý và Phân loại</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Tải lên file chat log (CSV)</label>
+                    <div class="upload-zone" id="uploadZone">
+                        <span class="icon">📁</span>
+                        <div class="text" id="uploadText">Kéo thả file CSV vào đây hoặc nhấn để chọn</div>
+                        <div class="file-info-wrapper" id="fileInfoWrapper" style="display: none;">
+                            <div class="filename" id="filenameDisplay" style="display: block; margin-top: 0;"></div>
+                            <button class="remove-file-btn" id="removeFileBtn" title="Xóa file">✕</button>
+                        </div>
+                        <input type="file" id="fileInput" accept=".csv">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">FPT Cloud API Key</label>
+                    <input type="password" class="form-input" id="apiKey" placeholder="Nhập API Key của bạn...">
+                </div>
+
+                <button class="btn" id="startBtn" onclick="startProcess()">Bắt đầu phân loại</button>
+            </div>
+
+            <div class="card" id="progress-area">
+                <h2 class="card-title">Tiến trình xử lý</h2>
+                <div class="status-text">
+                    <span id="statusLabel">Đang xử lý...</span>
+                    <span id="progressLabel">0/0</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <div class="eta-text" id="etaLabel">Ước tính còn lại: --s</div>
+            </div>
+
+            <div id="results-area">
+                <h2 class="card-title" style="margin-bottom:16px;">Thống kê Phân Loại</h2>
+                <div class="chart-container">
+                    <canvas id="resultsChart"></canvas>
+                </div>
+                <div id="statsTableContainer"></div>
+                <div class="actions">
+                    <button class="btn" id="downloadClassifiedBtn">📥 Tải File Phân Loại (.csv)</button>
+                    <button class="btn btn-outline" id="downloadStatsBtn">📥 Tải File Thống Kê (.csv)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Viewer -->
+        <div class="tab-content" id="tab-viewer">
+            <iframe id="viewer-iframe" src="/viewer"></iframe>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        // Theme logic
+        function toggleTheme() {
+            const root = document.documentElement;
+            const isLight = root.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                root.removeAttribute('data-theme');
+                document.getElementById('themeToggle').innerText = '☀️';
+                // Update iframe theme if possible
+                try {
+                    const iframeDoc = document.getElementById('viewer-iframe').contentDocument;
+                    if(iframeDoc) iframeDoc.documentElement.removeAttribute('data-theme');
+                } catch(e){}
+            } else {
+                root.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').innerText = '🌙';
+                try {
+                    const iframeDoc = document.getElementById('viewer-iframe').contentDocument;
+                    if(iframeDoc) iframeDoc.documentElement.setAttribute('data-theme', 'light');
+                } catch(e){}
+            }
+        }
+
+        // Tab logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        // Upload Logic
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        let selectedFile = null;
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                selectedFile = e.dataTransfer.files[0];
+                updateFileDisplay();
+            }
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                selectedFile = fileInput.files[0];
+                updateFileDisplay();
+            }
+        });
+
+        function updateFileDisplay() {
+            if (selectedFile) {
+                document.getElementById('fileInfoWrapper').style.display = 'flex';
+                document.getElementById('uploadText').style.display = 'none';
+                const sizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('filenameDisplay').innerText = `${selectedFile.name} (${sizeMB} MB)`;
+            } else {
+                document.getElementById('fileInfoWrapper').style.display = 'none';
+                document.getElementById('uploadText').style.display = 'block';
+                fileInput.value = '';
+            }
+        }
+
+        document.getElementById('removeFileBtn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Ngăn click lan ra upload zone
+            selectedFile = null;
+            updateFileDisplay();
+        });
+
+        function showToast(type, msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `<span>${msg}</span> <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:1.2rem;line-height:1;" onclick="this.parentElement.remove()">✕</button>`;
+            container.appendChild(toast);
+            
+            // Tự động xóa sau 5s
+            setTimeout(() => {
+                if(toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // Thay thế showAlert bằng showToast trong toàn bộ code
+        const showAlert = showToast;
+
+        // Process logic
+        let currentTaskId = null;
+
+        async function startProcess() {
+            if (!selectedFile) {
+                showAlert('error', 'Vui lòng tải lên file CSV.');
+                return;
+            }
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showAlert('error', 'Vui lòng nhập API Key.');
+                return;
+            }
+
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="spinner"></span> Đang kiểm tra API Key...';
+            document.getElementById('progress-area').style.display = 'none';
+            document.getElementById('results-area').style.display = 'none';
+
+            // 1. Check API Key
+            try {
+                const fd1 = new FormData();
+                fd1.append('api_key', apiKey);
+                const res1 = await fetch('/api/check_key', { method: 'POST', body: fd1 });
+                const data1 = await res1.json();
+                if (!data1.valid) {
+                    showAlert('error', 'API Key không hợp lệ hoặc không kết nối được FPT Cloud API.');
+            startBtn.disabled = false;
+            startBtn.innerHTML = 'Bắt đầu phân loại';
+            return;
+        }
+    } catch (err) {
+        showAlert('error', 'Lỗi kết nối máy chủ.');
+        startBtn.disabled = false;
+        startBtn.innerHTML = 'Bắt đầu phân loại';
+        return;
+    }
+
+    showAlert('success', 'API Key hợp lệ! Bắt đầu tải lên dữ liệu...');
+    startBtn.innerHTML = '<span class="spinner"></span> Đang tải lên và tiền xử lý...';
+
+            // 2. Upload file
+            try {
+                const fd2 = new FormData();
+                fd2.append('file', selectedFile);
+                fd2.append('api_key', apiKey);
+                const res2 = await fetch('/api/upload', { method: 'POST', body: fd2 });
+                if (!res2.ok) {
+                    const errData = await res2.json();
+                    showAlert('error', errData.detail || 'Lỗi xử lý file.');
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = 'Bắt đầu phân loại';
+                    return;
+                }
+                const data2 = await res2.json();
+                currentTaskId = data2.task_id;
+                
+                document.getElementById('progress-area').style.display = 'block';
+                startBtn.innerHTML = '<span class="spinner"></span> Đang phân loại...';
+                
+                // 3. Connect SSE
+                connectSSE(currentTaskId);
+            } catch (err) {
+                showAlert('error', 'Lỗi khi upload file.');
+                startBtn.disabled = false;
+                startBtn.innerHTML = 'Bắt đầu phân loại';
+            }
+        }
+
+        function connectSSE(taskId) {
+            const eventSource = new EventSource(`/api/stream/${taskId}`);
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                if (data.error) {
+                    showAlert('error', data.error);
+                    eventSource.close();
+                    resetBtn();
+                    return;
+                }
+
+                if (data.status === 'processing') {
+                    const pct = (data.processed / data.total) * 100;
+                    document.getElementById('progressBar').style.width = `${pct}%`;
+                    document.getElementById('progressLabel').innerText = `${data.processed}/${data.total}`;
+                    document.getElementById('etaLabel').innerText = `Ước tính còn lại: ${data.eta}s`;
+                } else if (data.status === 'done') {
+                    eventSource.close();
+                    document.getElementById('progressBar').style.width = `100%`;
+                    document.getElementById('statusLabel').innerText = 'Hoàn tất phân loại!';
+                    document.getElementById('etaLabel').innerText = `Xong.`;
+                    
+                    showResults(data.stats, taskId);
+                    resetBtn();
+                }
+            };
+
+            eventSource.onerror = function() {
+                eventSource.close();
+                showAlert('error', 'Mất kết nối với máy chủ khi đang stream.');
+                resetBtn();
+            };
+        }
+
+        function resetBtn() {
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = false;
+            startBtn.innerHTML = 'Bắt đầu phân loại';
+        }
+
+        let resultChartInstance = null;
+
+        function showResults(stats, taskId) {
+            const resultsArea = document.getElementById('results-area');
+            const tableContainer = document.getElementById('statsTableContainer');
+            
+            let html = `<table>
+                <thead>
+                    <tr><th>Use Case</th><th>Số lượng</th><th>Tỷ lệ (%)</th></tr>
+                </thead>
+                <tbody>`;
+            
+            const labels = [];
+            const dataCounts = [];
+            const backgroundColors = [
+                '#6366f1', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', 
+                '#ef4444', '#ec4899', '#14b8a6', '#f97316', '#84cc16'
+            ];
+            
+            stats.forEach(s => {
+                html += `<tr>
+                    <td>${s['Use Case']}</td>
+                    <td>${s['Số lượng']}</td>
+                    <td>${s['Tỷ lệ (%)']}%</td>
+                </tr>`;
+                labels.push(s['Use Case']);
+                dataCounts.push(s['Số lượng']);
+            });
+            html += `</tbody></table>`;
+            tableContainer.innerHTML = html;
+            
+            // Vẽ biểu đồ
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            if (resultChartInstance) {
+                resultChartInstance.destroy();
+            }
+            
+            resultChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataCounts,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                    return ` ${context.label}: ${value} (${percentage})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            document.getElementById('downloadClassifiedBtn').onclick = () => {
+                window.location.href = `/api/download/${taskId}/classified`;
+            };
+            document.getElementById('downloadStatsBtn').onclick = () => {
+                window.location.href = `/api/download/${taskId}/stats`;
+            };
+            
+            resultsArea.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

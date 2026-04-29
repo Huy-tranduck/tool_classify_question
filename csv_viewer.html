@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Viewer – Trình xem CSV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-secondary: #1a1d27;
+            --bg-card: #222633;
+            --bg-hover: #2a2f3f;
+            --border: #2e3348;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0b4;
+            --text-muted: #6b7280;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+            --tag-true: #065f46;
+            --tag-true-text: #6ee7b7;
+            --tag-false: #7f1d1d;
+            --tag-false-text: #fca5a5;
+            --bg-header: linear-gradient(135deg, #1e2235, #252a3d);
+            --bg-header-hover: linear-gradient(135deg, #252a3d, #2e3450);
+            --text-header: #9aa0b4;
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --border: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-glow: rgba(79, 70, 229, 0.15);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --tag-true: #d1fae5;
+            --tag-true-text: #065f46;
+            --tag-false: #fee2e2;
+            --tag-false-text: #991b1b;
+            --bg-header: #f1f5f9;
+            --bg-header-hover: #e2e8f0;
+            --text-header: #475569;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 48px;
+            text-align: center;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .upload-zone .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upload-zone .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        /* Controls Bar */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9rem;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .control-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .control-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        select.control-btn {
+            appearance: none;
+            padding-right: 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa0b4' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+        }
+
+        select.control-btn option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .stat .label {
+            color: var(--text-muted);
+        }
+
+        .stat .value {
+            font-weight: 600;
+            color: var(--accent-hover);
+        }
+
+        /* Table Container */
+        .table-container {
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.6s ease 0.3s both;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        thead th {
+            background: var(--bg-header);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-header);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--accent);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        thead th:hover {
+            background: var(--bg-header-hover);
+            color: var(--text-primary);
+        }
+
+        thead th .sort-icon {
+            margin-left: 4px;
+            opacity: 0.4;
+        }
+
+        thead th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--accent-hover);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: var(--bg-hover);
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            vertical-align: top;
+            line-height: 1.5;
+            border-right: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        tbody td:last-child {
+            border-right: none;
+        }
+
+        /* Specific column styles */
+        .col-index {
+            width: 50px;
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .col-conv-id,
+        .col-msg-id {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .col-sender {
+            white-space: nowrap;
+            font-weight: 500;
+            color: var(--accent-hover);
+            max-width: 150px;
+        }
+
+        .col-sender.bot {
+            color: var(--success);
+            font-style: italic;
+        }
+
+        .col-content {
+            max-width: 600px;
+            min-width: 300px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .col-content.truncated {
+            max-height: 120px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .col-content.truncated::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, var(--bg-secondary));
+            pointer-events: none;
+        }
+
+        tbody tr:hover .col-content.truncated::after {
+            background: linear-gradient(transparent, var(--bg-hover));
+        }
+
+        .col-content .expand-btn {
+            display: inline-block;
+            margin-top: 4px;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .col-content .expand-btn:hover {
+            text-decoration: underline;
+        }
+
+        .col-follow-up {
+            text-align: center;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .tag-true {
+            background: var(--tag-true);
+            color: var(--tag-true-text);
+        }
+
+        .tag-false {
+            background: var(--tag-false);
+            color: var(--tag-false-text);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .page-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 0 8px;
+        }
+
+        /* Conversation view */
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 3px;
+            border: 1px solid var(--border);
+        }
+
+        .view-toggle button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Chat view */
+        .chat-view {
+            display: none;
+        }
+
+        .chat-view.active {
+            display: block;
+        }
+
+        .table-container.hidden {
+            display: none;
+        }
+
+        .chat-conversation {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .chat-conv-header {
+            padding: 12px 20px;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-conv-header:hover {
+            background: var(--bg-header-hover);
+        }
+
+        .chat-conv-header .conv-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .chat-conv-header .conv-meta {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .chat-messages {
+            padding: 16px 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .chat-messages.collapsed {
+            display: none;
+        }
+
+        .chat-msg {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-msg.user {
+            align-items: flex-end;
+        }
+
+        .chat-msg.bot {
+            align-items: flex-start;
+        }
+
+        .chat-msg .msg-sender {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            padding: 0 12px;
+        }
+
+        .chat-msg .msg-bubble {
+            max-width: 75%;
+            padding: 10px 16px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .chat-msg.user .msg-bubble {
+            background: var(--accent);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-msg.bot .msg-bubble {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-msg .msg-tag {
+            margin-top: 4px;
+            padding: 0 12px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        /* Highlight */
+        mark {
+            background: rgba(251, 191, 36, 0.3);
+            color: var(--text-primary);
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Modal for full content */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.3s ease;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--error);
+            border-color: var(--error);
+        }
+
+        .modal-body {
+            white-space: pre-wrap;
+            line-height: 1.7;
+            font-size: 0.9rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .col-conv-id,
+            .col-msg-id {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle"
+            title="Chuyển chế độ giao diện">☀️</button>
+        <header class="header">
+            <h1>📊 CSV Viewer</h1>
+            <p>Kéo thả file CSV hoặc nhấn để tải lên</p>
+        </header>
+
+        <div class="upload-zone" id="uploadZone">
+            <span class="icon">📁</span>
+            <div class="title">Kéo thả file CSV vào đây</div>
+            <div class="subtitle">hoặc nhấn để chọn file • Hỗ trợ UTF-8</div>
+            <input type="file" id="fileInput" accept=".csv,.tsv,.txt">
+        </div>
+
+        <div class="controls" id="controls" style="display:none;">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm trong bảng...">
+            </div>
+            <label class="control-btn"
+                style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;"
+                title="Tìm chính xác nội dung Message Content">
+                <input type="checkbox" id="exactMatchCheckbox" onchange="triggerSearch()"
+                    style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent);">
+                Khớp chính xác
+            </label>
+            <div class="view-toggle">
+                <button class="active" data-view="table" onclick="switchView('table')">📋 Bảng</button>
+                <button data-view="chat" onclick="switchView('chat')">💬 Chat</button>
+            </div>
+            <select class="control-btn" id="pageSize" onchange="changePageSize()">
+                <option value="25" selected>25 dòng</option>
+                <option value="50">50 dòng</option>
+                <option value="100">100 dòng</option>
+                <option value="500">500 dòng</option>
+                <option value="all">Tất cả</option>
+            </select>
+            <button class="control-btn" id="truncateBtn" onclick="toggleTruncate()">✂️ Thu gọn nội dung</button>
+            <button class="control-btn" onclick="exportFiltered()">📥 Xuất lọc</button>
+        </div>
+
+        <div class="stats-bar" id="statsBar" style="display:none;">
+            <div class="stat">
+                <span class="label">File:</span>
+                <span class="value" id="fileName">-</span>
+            </div>
+            <div class="stat">
+                <span class="label">Tổng dòng:</span>
+                <span class="value" id="totalRows">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Hiện:</span>
+                <span class="value" id="showingRows">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Cột:</span>
+                <span class="value" id="totalCols">0</span>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Đang tải file...</div>
+        </div>
+
+        <div class="table-container" id="tableContainer" style="display:none;">
+            <div class="table-scroll">
+                <table id="dataTable">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="chat-view" id="chatView"></div>
+
+        <div class="pagination" id="pagination" style="display:none;"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nội dung đầy đủ</h3>
+                <button class="modal-close"
+                    onclick="document.getElementById('modal').classList.remove('active')">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let headers = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let rowsPerPage = 25;
+        let sortCol = -1;
+        let sortAsc = true;
+        let truncateContent = true;
+        let currentView = 'table';
+        let searchTerm = '';
+
+        // File upload handling
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        function handleFile(file) {
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('fileName').textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                parseCSV(e.target.result);
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('controls').style.display = 'flex';
+                document.getElementById('statsBar').style.display = 'flex';
+                uploadZone.style.display = 'none';
+                renderAll();
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let current = '';
+            let inQuotes = false;
+            let row = [];
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                const next = text[i + 1];
+
+                if (inQuotes) {
+                    if (ch === '"' && next === '"') {
+                        current += '"';
+                        i++;
+                    } else if (ch === '"') {
+                        inQuotes = false;
+                    } else {
+                        current += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ',') {
+                        row.push(current.trim());
+                        current = '';
+                    } else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+                        row.push(current.trim());
+                        current = '';
+                        if (row.length > 1 || row[0] !== '') rows.push(row);
+                        row = [];
+                        if (ch === '\r') i++;
+                    } else {
+                        current += ch;
+                    }
+                }
+            }
+            // Last row
+            if (current || row.length) {
+                row.push(current.trim());
+                if (row.length > 1 || row[0] !== '') rows.push(row);
+            }
+
+            if (rows.length > 0) {
+                headers = rows[0];
+                allData = rows.slice(1);
+            }
+
+            filteredData = [...allData];
+        }
+
+        function renderAll() {
+            updateStats();
+            const tableEl = document.getElementById('tableContainer');
+            const chatEl = document.getElementById('chatView');
+            if (currentView === 'table') {
+                tableEl.style.display = 'block';
+                chatEl.style.display = 'none';
+                renderTable();
+            } else {
+                tableEl.style.display = 'none';
+                chatEl.style.display = 'block';
+                renderChatView();
+            }
+            renderPagination();
+        }
+
+        function updateStats() {
+            document.getElementById('totalRows').textContent = allData.length.toLocaleString();
+            document.getElementById('showingRows').textContent = filteredData.length.toLocaleString();
+            document.getElementById('totalCols').textContent = headers.length;
+        }
+
+        function getColumnClass(header, idx) {
+            const h = header.toLowerCase();
+            if (h === '' && idx === 0) return 'col-index';
+            if (h.includes('conversation id') || h.includes('conversation_id')) return 'col-conv-id';
+            if (h.includes('message id') || h.includes('message_id')) return 'col-msg-id';
+            if (h.includes('sender')) return 'col-sender';
+            if (h.includes('content') || h.includes('message content')) return 'col-content';
+            if (h.includes('follow')) return 'col-follow-up';
+            return '';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function highlightText(text, term) {
+            if (!term) return escapeHtml(text);
+            const escaped = escapeHtml(text);
+            const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return escaped.replace(regex, '<mark>$1</mark>');
+        }
+
+        function renderTable() {
+
+            // Header
+            const thead = document.getElementById('tableHead');
+            let headHtml = '<tr>';
+            headHtml += `<th style="width: 50px; text-align: center;">STT</th>`;
+            headers.forEach((h, i) => {
+                const sorted = sortCol === i;
+                const arrow = sorted ? (sortAsc ? '↑' : '↓') : '↕';
+                const cls = sorted ? 'sorted' : '';
+                const displayName = h || '#';
+                headHtml += `<th class="${cls}" onclick="sortBy(${i})">${escapeHtml(displayName)} <span class="sort-icon">${arrow}</span></th>`;
+            });
+            headHtml += '</tr>';
+            thead.innerHTML = headHtml;
+
+            // Body
+            const tbody = document.getElementById('tableBody');
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = rowsPerPage === Infinity ? filteredData.length : Math.min(start + rowsPerPage, filteredData.length);
+            const pageData = filteredData.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${headers.length}" class="empty-state"><div class="icon">📭</div><div>Không tìm thấy kết quả</div></td></tr>`;
+                return;
+            }
+
+            let bodyHtml = '';
+            pageData.forEach((row, ri) => {
+                const globalRowIdx = start + ri + 1;
+                bodyHtml += '<tr>';
+                bodyHtml += `<td class="col-index">${globalRowIdx}</td>`;
+                headers.forEach((h, ci) => {
+                    const cls = getColumnClass(h, ci);
+                    let val = row[ci] || '';
+
+                    if (cls === 'col-follow-up') {
+                        const isTrue = val.toLowerCase() === 'true';
+                        bodyHtml += `<td class="${cls}"><span class="tag ${isTrue ? 'tag-true' : 'tag-false'}">${val}</span></td>`;
+                    } else if (cls === 'col-sender') {
+                        const isBot = val === '' || val === 'Bot' || val === 'bot';
+                        const displayVal = isBot ? '🤖 Bot' : val;
+                        bodyHtml += `<td class="${cls} ${isBot ? 'bot' : ''}">${highlightText(displayVal, searchTerm)}</td>`;
+                    } else if (cls === 'col-content') {
+                        const needsTruncate = truncateContent && val.length > 300;
+                        const contentCls = needsTruncate ? 'truncated' : '';
+                        const id = `cell-${start + ri}-${ci}`;
+                        bodyHtml += `<td class="${cls} ${contentCls}" id="${id}" ${needsTruncate ? `onclick="showFull('${id}', ${start + ri}, ${ci})"` : ''}>${highlightText(val, searchTerm)}</td>`;
+                    } else if (cls === 'col-conv-id' || cls === 'col-msg-id') {
+                        bodyHtml += `<td class="${cls}" title="${escapeHtml(val)}">${highlightText(val, searchTerm)}</td>`;
+                    } else {
+                        bodyHtml += `<td class="${cls}">${highlightText(val, searchTerm)}</td>`;
+                    }
+                });
+                bodyHtml += '</tr>';
+            });
+            tbody.innerHTML = bodyHtml;
+        }
+
+        function renderChatView() {
+            const chatView = document.getElementById('chatView');
+
+            // Group by conversation ID
+            const convIdIdx = headers.findIndex(h => h.toLowerCase().includes('conversation id') || h.toLowerCase().includes('conversation_id'));
+            const senderIdx = headers.findIndex(h => h.toLowerCase().includes('sender'));
+            const contentIdx = headers.findIndex(h => h.toLowerCase().includes('content'));
+            const followIdx = headers.findIndex(h => h.toLowerCase().includes('follow'));
+
+            if (convIdIdx < 0 || contentIdx < 0) {
+                chatView.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div>Không tìm thấy cột Conversation ID hoặc Message Content</div></div>';
+                return;
+            }
+
+            const convMap = new Map();
+            filteredData.forEach(row => {
+                const cid = row[convIdIdx] || 'unknown';
+                if (!convMap.has(cid)) convMap.set(cid, []);
+                convMap.get(cid).push(row);
+            });
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const convArr = [...convMap.entries()];
+            const pageConvs = rowsPerPage === Infinity ? convArr : convArr.slice(start, end);
+
+            let html = '';
+            pageConvs.forEach(([cid, msgs], idx) => {
+                const globalIdx = start + idx;
+                const senders = [...new Set(msgs.map(m => m[senderIdx]).filter(s => s))];
+                html += `<div class="chat-conversation">
+                    <div class="chat-conv-header" onclick="toggleConv(${globalIdx})">
+                        <span class="conv-title">💬 ${senders.join(', ') || 'Cuộc hội thoại'}</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="conv-meta">${msgs.length} tin nhắn • ID: <span style="user-select: text;">${cid}</span></span>
+                            <button onclick="event.stopPropagation(); copyToClipboard(this, '${cid}')" style="background:none; border:none; cursor:pointer; font-size:1rem; opacity: 0.7;" title="Copy ID" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">📋</button>
+                        </div>
+                    </div>
+                    <div class="chat-messages ${idx > 2 ? 'collapsed' : ''}" id="conv-${globalIdx}">`;
+
+                msgs.forEach(msg => {
+                    const sender = msg[senderIdx] || '';
+                    const content = msg[contentIdx] || '';
+                    const isUser = sender !== '';
+                    const followUp = followIdx >= 0 ? msg[followIdx] : '';
+
+                    html += `<div class="chat-msg ${isUser ? 'user' : 'bot'}">
+                        <div class="msg-sender">${isUser ? escapeHtml(sender) : '🤖 Bot'}</div>
+                        <div class="msg-bubble">${highlightText(content, searchTerm)}</div>
+                        ${followUp.toLowerCase() === 'true' ? '<div class="msg-tag"><span class="tag tag-true">Follow-up</span></div>' : ''}
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            chatView.innerHTML = html || '<div class="empty-state"><div class="icon">📭</div><div>Không có dữ liệu</div></div>';
+        }
+
+        function toggleConv(idx) {
+            document.getElementById(`conv-${idx}`).classList.toggle('collapsed');
+        }
+
+        function copyToClipboard(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                const originalColor = btn.style.color;
+                btn.innerText = '✓';
+                btn.style.color = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.color = originalColor;
+                }, 2000);
+            }).catch(err => {
+                console.error('Lỗi khi copy', err);
+            });
+        }
+
+        function getTotalPages() {
+            if (rowsPerPage === Infinity) return 1;
+            if (currentView === 'table') {
+                return Math.ceil(filteredData.length / rowsPerPage);
+            } else {
+                const convIdIdx = headers.findIndex(h => h.toLowerCase().includes('conversation id') || h.toLowerCase().includes('conversation_id'));
+                if (convIdIdx < 0) return 1;
+                const convSet = new Set();
+                filteredData.forEach(row => {
+                    const cid = row[convIdIdx] || 'unknown';
+                    convSet.add(cid);
+                });
+                return Math.ceil(convSet.size / rowsPerPage);
+            }
+        }
+
+        function renderPagination() {
+            const pag = document.getElementById('pagination');
+            if (rowsPerPage === Infinity) {
+                pag.style.display = 'none';
+                return;
+            }
+
+            const totalPages = getTotalPages();
+            if (totalPages <= 1) {
+                pag.style.display = 'none';
+                return;
+            }
+
+            pag.style.display = 'flex';
+            let html = '';
+            html += `<button class="page-btn" onclick="goPage(1)" ${currentPage === 1 ? 'disabled' : ''}>⟨⟨</button>`;
+            html += `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>⟨</button>`;
+
+            let startPage = Math.max(1, currentPage - 3);
+            let endPage = Math.min(totalPages, startPage + 6);
+            startPage = Math.max(1, endPage - 6);
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+            }
+
+            html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>⟩</button>`;
+            html += `<button class="page-btn" onclick="goPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>⟩⟩</button>`;
+            html += `<span class="page-info">Trang ${currentPage} / ${totalPages}</span>`;
+
+            pag.innerHTML = html;
+        }
+
+        function goPage(p) {
+            const totalPages = getTotalPages();
+            currentPage = Math.max(1, Math.min(totalPages, p));
+            renderAll();
+            document.getElementById('controls').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            const tableScroll = document.querySelector('.table-scroll');
+            if (tableScroll) tableScroll.scrollTop = 0;
+        }
+
+        function changePageSize() {
+            const val = document.getElementById('pageSize').value;
+            rowsPerPage = val === 'all' ? Infinity : parseInt(val);
+            currentPage = 1;
+            renderAll();
+        }
+
+        function toggleTheme() {
+            const root = document.documentElement;
+            const isLight = root.getAttribute('data-theme') === 'light';
+            if (isLight) {
+                root.removeAttribute('data-theme');
+                document.getElementById('themeToggle').innerText = '☀️';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').innerText = '🌙';
+            }
+        }
+
+        function sortBy(colIdx) {
+            if (sortCol === colIdx) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = colIdx;
+                sortAsc = true;
+            }
+
+            filteredData.sort((a, b) => {
+                let va = a[colIdx] || '';
+                let vb = b[colIdx] || '';
+                const na = parseFloat(va);
+                const nb = parseFloat(vb);
+                if (!isNaN(na) && !isNaN(nb)) {
+                    return sortAsc ? na - nb : nb - na;
+                }
+                return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+            });
+
+            currentPage = 1;
+            renderAll();
+        }
+
+        function toggleTruncate() {
+            truncateContent = !truncateContent;
+            const btn = document.getElementById('truncateBtn');
+            btn.classList.toggle('active', truncateContent);
+            btn.textContent = truncateContent ? '✂️ Thu gọn nội dung' : '📄 Hiện đầy đủ';
+            renderAll();
+        }
+
+        function showFull(id, rowIdx, colIdx) {
+            const val = filteredData[rowIdx][colIdx] || '';
+            document.getElementById('modalTitle').textContent = `${headers[colIdx] || 'Nội dung'} — Dòng ${rowIdx + 1}`;
+            document.getElementById('modalBody').textContent = val;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (event.target === event.currentTarget) {
+                document.getElementById('modal').classList.remove('active');
+            }
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                document.getElementById('modal').classList.remove('active');
+            }
+        });
+
+        function switchView(view) {
+            if (currentView !== view) {
+                currentView = view;
+                currentPage = 1; // Reset trang về 1 khi chuyển view để tránh lỗi out-of-bounds
+                document.querySelectorAll('.view-toggle button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                renderAll();
+            }
+        }
+
+        // Search
+        let searchTimeout;
+
+        function triggerSearch() {
+            const isExactMatch = document.getElementById('exactMatchCheckbox').checked;
+            const contentIdx = headers.findIndex(h => h.toLowerCase().includes('content'));
+
+            if (searchTerm) {
+                const searchLower = searchTerm.toLowerCase();
+                filteredData = allData.filter(row => {
+                    if (isExactMatch) {
+                        if (contentIdx >= 0) {
+                            return (row[contentIdx] || '').trim().toLowerCase() === searchLower;
+                        } else {
+                            return row.some(cell => (cell || '').trim().toLowerCase() === searchLower);
+                        }
+                    } else {
+                        return row.some(cell => (cell || '').toLowerCase().includes(searchLower));
+                    }
+                });
+            } else {
+                filteredData = [...allData];
+            }
+            currentPage = 1;
+            renderAll();
+        }
+
+        document.getElementById('searchInput').addEventListener('input', e => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchTerm = e.target.value.trim();
+                triggerSearch();
+            }, 300);
+        });
+
+        function exportFiltered() {
+            let csv = headers.map(h => `"${h.replace(/"/g, '""')}"`).join(',') + '\n';
+            filteredData.forEach(row => {
+                csv += row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'filtered_data.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-load if file path is provided via URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoFile = urlParams.get('file');
+        if (autoFile) {
+            fetch(autoFile)
+                .then(r => r.text())
+                .then(text => {
+                    document.getElementById('fileName').textContent = autoFile.split('/').pop();
+                    parseCSV(text);
+                    document.getElementById('controls').style.display = 'flex';
+                    document.getElementById('statsBar').style.display = 'flex';
+                    uploadZone.style.display = 'none';
+                    renderAll();
+                })
+                .catch(() => { });
+        }
+    </script>
+</body>
+
+</html>
