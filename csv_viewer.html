@@ -8,10 +8,36 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
+            --bg-primary: #f4f6fb;
+            --bg-secondary: #ffffff;
+            --bg-card: #f1f5f9;
+            --bg-hover: #f0f2f8;
+            --border: #e2e7ef;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-glow: rgba(79, 70, 229, 0.10);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --tag-true: #d1fae5;
+            --tag-true-text: #065f46;
+            --tag-false: #fee2e2;
+            --tag-false-text: #991b1b;
+            --bg-header: #f8f9fc;
+            --bg-header-hover: #f0f2f8;
+            --text-header: #475569;
+            --radius: 14px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(79,70,229,0.06);
+        }
+
+        [data-theme="dark"] {
             --bg-primary: #0f1117;
             --bg-secondary: #1a1d27;
             --bg-card: #222633;
-            --bg-hover: #2a2f3f;
+            --bg-hover: #252837;
             --border: #2e3348;
             --text-primary: #e8eaed;
             --text-secondary: #9aa0b4;
@@ -29,33 +55,7 @@
             --bg-header: linear-gradient(135deg, #1e2235, #252a3d);
             --bg-header-hover: linear-gradient(135deg, #252a3d, #2e3450);
             --text-header: #9aa0b4;
-            --radius: 12px;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        [data-theme="light"] {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-card: #f1f5f9;
-            --bg-hover: #e2e8f0;
-            --border: #cbd5e1;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --accent: #4f46e5;
-            --accent-hover: #4338ca;
-            --accent-glow: rgba(79, 70, 229, 0.15);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --tag-true: #d1fae5;
-            --tag-true-text: #065f46;
-            --tag-false: #fee2e2;
-            --tag-false-text: #991b1b;
-            --bg-header: #f1f5f9;
-            --bg-header-hover: #e2e8f0;
-            --text-header: #475569;
-            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
         }
 
         * {
@@ -860,7 +860,7 @@
 <body>
     <div class="app">
         <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle"
-            title="Chuyển chế độ giao diện">☀️</button>
+            title="Chuyển chế độ giao diện">🌙</button>
         <header class="header">
             <h1>📊 CSV Viewer</h1>
             <p>Kéo thả file CSV hoặc nhấn để tải lên</p>
@@ -1297,13 +1297,13 @@
 
         function toggleTheme() {
             const root = document.documentElement;
-            const isLight = root.getAttribute('data-theme') === 'light';
-            if (isLight) {
+            const isDark = root.getAttribute('data-theme') === 'dark';
+            if (isDark) {
                 root.removeAttribute('data-theme');
-                document.getElementById('themeToggle').innerText = '☀️';
-            } else {
-                root.setAttribute('data-theme', 'light');
                 document.getElementById('themeToggle').innerText = '🌙';
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').innerText = '☀️';
             }
         }
 
