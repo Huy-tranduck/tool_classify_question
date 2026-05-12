@@ -9,42 +9,46 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
+            --bg-primary: #f4f6fb;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-hover: #f0f2f8;
+            --border: #e2e7ef;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent: #4f46e5;
+            --accent-hover: #4338ca;
+            --accent-light: #eef2ff;
+            --accent-glow: rgba(79, 70, 229, 0.10);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-header: #f8f9fc;
+            --radius: 14px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(79,70,229,0.06);
+            --shadow-lg: 0 8px 32px rgba(79,70,229,0.10);
+        }
+
+        [data-theme="dark"] {
             --bg-primary: #0f1117;
-            --bg-secondary: rgba(26, 29, 39, 0.75);
-            --bg-card: #222633;
-            --bg-hover: #2a2f3f;
+            --bg-secondary: rgba(26, 29, 39, 0.85);
+            --bg-card: #1a1d27;
+            --bg-hover: #252837;
             --border: #2e3348;
             --text-primary: #e8eaed;
             --text-secondary: #9aa0b4;
             --text-muted: #6b7280;
             --accent: #6366f1;
             --accent-hover: #818cf8;
+            --accent-light: rgba(99, 102, 241, 0.12);
             --accent-glow: rgba(99, 102, 241, 0.15);
             --success: #34d399;
             --warning: #fbbf24;
             --error: #f87171;
             --bg-header: linear-gradient(135deg, #1e2235, #252a3d);
-            --radius: 12px;
             --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        [data-theme="light"] {
-            --bg-primary: #f8fafc;
-            --bg-secondary: rgba(255, 255, 255, 0.75);
-            --bg-card: #f1f5f9;
-            --bg-hover: #e2e8f0;
-            --border: #cbd5e1;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --accent: #4f46e5;
-            --accent-hover: #4338ca;
-            --accent-glow: rgba(79, 70, 229, 0.15);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --bg-header: #f1f5f9;
-            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,38 +68,69 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background:
-                radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+                radial-gradient(ellipse at 20% 50%, rgba(79, 70, 229, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
 
+        [data-theme="dark"] body::before,
+        [data-theme="dark"]::before {
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
         /* Navbar / Tabs */
         .navbar {
-            position: relative;
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            z-index: 50;
             background: var(--bg-secondary);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
-            padding: 0 24px;
+            padding: 0 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 64px;
+            height: 60px;
         }
 
         .nav-logo {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-logo .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), #818cf8);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
         }
 
         .tabs {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             height: 100%;
             align-items: center;
         }
@@ -103,14 +138,15 @@
         .tab-btn {
             background: transparent;
             border: none;
-            color: var(--text-secondary);
+            color: var(--text-muted);
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             font-weight: 500;
             padding: 8px 16px;
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.2s;
+            position: relative;
         }
 
         .tab-btn:hover {
@@ -120,26 +156,47 @@
 
         .tab-btn.active {
             color: var(--accent);
-            background: var(--accent-glow);
+            background: transparent;
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 16px;
+            right: 16px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .theme-toggle {
-            background: transparent;
+            background: var(--bg-hover);
             border: 1px solid var(--border);
-            color: var(--text-primary);
+            color: var(--text-secondary);
             width: 36px;
             height: 36px;
-            border-radius: 50%;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
+            transition: all 0.25s;
+            font-size: 1rem;
         }
 
         .theme-toggle:hover {
             border-color: var(--accent);
-            transform: scale(1.1);
+            background: var(--accent-light);
+            color: var(--accent);
+            transform: scale(1.05);
         }
 
         /* Content Container */
@@ -182,20 +239,38 @@
 
         /* Form Controls */
         .card {
-            background: var(--bg-secondary);
-            backdrop-filter: blur(12px);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 32px;
             box-shadow: var(--shadow);
             margin-bottom: 24px;
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
         }
 
         .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
             margin-bottom: 24px;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title .title-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
         }
 
         .form-group {
@@ -230,57 +305,98 @@
 
         .upload-zone {
             border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 32px;
+            border-radius: var(--radius);
+            padding: 40px 32px;
             text-align: center;
             background: var(--bg-primary);
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
         }
 
         .upload-zone:hover, .upload-zone.dragover {
             border-color: var(--accent);
-            background: var(--accent-glow);
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .upload-zone input { display: none; }
-        .upload-zone .icon { font-size: 2rem; margin-bottom: 8px; display: block; }
-        .upload-zone .text { font-size: 0.95rem; color: var(--text-secondary); }
+        .upload-zone .icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+        .upload-zone .text { font-size: 0.95rem; color: var(--text-secondary); font-weight: 500; }
+        .upload-zone .text-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; }
         .upload-zone .filename { margin-top: 8px; font-weight: 600; color: var(--accent); display: none; }
+
+        .form-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+
+        .input-wrapper .form-input {
+            padding-left: 40px;
+        }
 
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
-            background: var(--accent);
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
             color: #fff;
             font-family: 'Inter', sans-serif;
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s;
             width: 100%;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn:hover:not(:disabled) {
-            background: var(--accent-hover);
+            background: linear-gradient(135deg, var(--accent-hover), #4f46e5);
             transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
         }
         
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            box-shadow: none;
         }
 
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-primary);
+            box-shadow: none;
         }
 
         .btn-outline:hover:not(:disabled) {
             background: var(--bg-hover);
             border-color: var(--accent);
+            box-shadow: none;
         }
 
         /* Progress Area */
@@ -485,30 +601,316 @@
             max-width: 400px;
             margin: 0 auto 24px auto;
         }
+
+        /* ─── History Tab Styles ─── */
+        #tab-history {
+            overflow-y: auto;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .history-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-count-badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .history-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.4s ease backwards;
+        }
+
+        .history-card:nth-child(1) { animation-delay: 0s; }
+        .history-card:nth-child(2) { animation-delay: 0.05s; }
+        .history-card:nth-child(3) { animation-delay: 0.1s; }
+        .history-card:nth-child(4) { animation-delay: 0.15s; }
+        .history-card:nth-child(5) { animation-delay: 0.2s; }
+
+        .history-card:hover {
+            border-color: var(--accent);
+            border-left-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .history-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .history-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-filename {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
+
+        .history-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .history-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-meta-item .icon {
+            font-size: 1rem;
+        }
+
+        .history-card-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .history-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .history-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .history-btn.danger:hover {
+            color: var(--error);
+            border-color: var(--error);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .history-btn.primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .history-btn.primary:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Stats Expansion */
+        .history-stats-panel {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .history-stats-panel.open {
+            display: block;
+        }
+
+        .history-stats-panel table {
+            font-size: 0.85rem;
+        }
+
+        .history-stats-panel th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Empty State */
+        .history-empty {
+            text-align: center;
+            padding: 80px 24px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .history-empty .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+
+        .history-empty h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .history-empty p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Loading Skeleton */
+        .history-skeleton {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .skeleton-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            background: var(--bg-hover);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-line.short { width: 40%; }
+        .skeleton-line.medium { width: 65%; }
+        .skeleton-line.long { width: 90%; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Delete Confirm Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-box h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .modal-box p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-actions .btn {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .btn-danger {
+            background: var(--error);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+        }
     </style>
 </head>
 
 <body>
     <div class="navbar">
-        <div class="nav-logo">FinGov Dashboard</div>
+        <div class="nav-logo"><span class="logo-icon">F</span> FinGov</div>
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('classify')">Phân loại câu hỏi</button>
+            <button class="tab-btn" onclick="switchTab('history')">Lịch sử</button>
             <button class="tab-btn" onclick="switchTab('viewer')">CSV Viewer</button>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">☀️</button>
+        <div class="nav-right">
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+        </div>
     </div>
 
     <div class="content">
         <!-- Tab 1: Classify -->
         <div class="tab-content active" id="tab-classify">
             <div class="card">
-                <h2 class="card-title">Tiền xử lý và Phân loại</h2>
+                <h2 class="card-title"><span class="title-icon">📊</span> Tiền xử lý và Phân loại</h2>
                 
                 <div class="form-group">
                     <label class="form-label">Tải lên file chat log (CSV)</label>
                     <div class="upload-zone" id="uploadZone">
-                        <span class="icon">📁</span>
+                        <span class="icon">📂</span>
                         <div class="text" id="uploadText">Kéo thả file CSV vào đây hoặc nhấn để chọn</div>
+                        <div class="text-sub">Hỗ trợ định dạng .csv</div>
                         <div class="file-info-wrapper" id="fileInfoWrapper" style="display: none;">
                             <div class="filename" id="filenameDisplay" style="display: block; margin-top: 0;"></div>
                             <button class="remove-file-btn" id="removeFileBtn" title="Xóa file">✕</button>
@@ -517,12 +919,17 @@
                     </div>
                 </div>
 
+                <div class="form-divider"></div>
+
                 <div class="form-group">
                     <label class="form-label">FPT Cloud API Key</label>
-                    <input type="password" class="form-input" id="apiKey" placeholder="Nhập API Key của bạn...">
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" class="form-input" id="apiKey" placeholder="Nhập API Key của bạn...">
+                    </div>
                 </div>
 
-                <button class="btn" id="startBtn" onclick="startProcess()">Bắt đầu phân loại</button>
+                <button class="btn" id="startBtn" onclick="startProcess()">▶ Bắt đầu phân loại</button>
             </div>
 
             <div class="card" id="progress-area">
@@ -550,7 +957,18 @@
             </div>
         </div>
 
-        <!-- Tab 2: Viewer -->
+        <!-- Tab 2: History -->
+        <div class="tab-content" id="tab-history">
+            <div class="history-header">
+                <h2><span class="title-icon">📋</span> Lịch sử phân loại</h2>
+                <span class="history-count-badge" id="historyCountBadge" style="display:none;">0 lần chạy</span>
+            </div>
+            <div id="historyContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Tab 3: Viewer -->
         <div class="tab-content" id="tab-viewer">
             <iframe id="viewer-iframe" src="/viewer"></iframe>
         </div>
@@ -559,27 +977,47 @@
     <div id="toast-container"></div>
 
     <script>
-        // Theme logic
+        // Theme logic — light mode is default
+        function initTheme() {
+            const saved = localStorage.getItem('fingov-theme');
+            if (saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').innerText = '☀️';
+            }
+            // Sync iframe theme after it loads
+            const iframe = document.getElementById('viewer-iframe');
+            iframe.addEventListener('load', () => syncIframeTheme());
+        }
+
+        function syncIframeTheme() {
+            try {
+                const iframe = document.getElementById('viewer-iframe');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    iframeDoc.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    iframeDoc.documentElement.removeAttribute('data-theme');
+                }
+            } catch(e) {}
+        }
+
         function toggleTheme() {
             const root = document.documentElement;
-            const isLight = root.getAttribute('data-theme') === 'light';
-            if (isLight) {
+            const isDark = root.getAttribute('data-theme') === 'dark';
+            if (isDark) {
                 root.removeAttribute('data-theme');
-                document.getElementById('themeToggle').innerText = '☀️';
-                // Update iframe theme if possible
-                try {
-                    const iframeDoc = document.getElementById('viewer-iframe').contentDocument;
-                    if(iframeDoc) iframeDoc.documentElement.removeAttribute('data-theme');
-                } catch(e){}
-            } else {
-                root.setAttribute('data-theme', 'light');
                 document.getElementById('themeToggle').innerText = '🌙';
-                try {
-                    const iframeDoc = document.getElementById('viewer-iframe').contentDocument;
-                    if(iframeDoc) iframeDoc.documentElement.setAttribute('data-theme', 'light');
-                } catch(e){}
+                localStorage.setItem('fingov-theme', 'light');
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').innerText = '☀️';
+                localStorage.setItem('fingov-theme', 'dark');
             }
+            syncIframeTheme();
         }
+
+        initTheme();
 
         // Tab logic
         function switchTab(tabId) {
@@ -588,6 +1026,11 @@
             
             event.target.classList.add('active');
             document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            // Auto-load history when switching to the tab
+            if (tabId === 'history') {
+                loadHistory();
+            }
         }
 
         // Upload Logic
@@ -636,7 +1079,8 @@
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<span>${msg}</span> <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:1.2rem;line-height:1;" onclick="this.parentElement.remove()">✕</button>`;
+            const icon = type === 'success' ? '✅' : '❌';
+            toast.innerHTML = `<span>${icon} ${msg}</span> <button style="background:none;border:none;color:inherit;cursor:pointer;font-size:1.2rem;line-height:1;margin-left:12px;" onclick="this.parentElement.remove()">✕</button>`;
             container.appendChild(toast);
             
             // Tự động xóa sau 5s
@@ -835,6 +1279,190 @@
             };
             
             resultsArea.style.display = 'block';
+        }
+
+        // ─── History Logic ────────────────────────────────────────────────
+
+        let historyData = [];
+
+        async function loadHistory() {
+            const container = document.getElementById('historyContent');
+            // Show skeleton loading
+            container.innerHTML = `
+                <div class="history-skeleton">
+                    ${[1,2,3].map(() => `
+                        <div class="skeleton-card">
+                            <div class="skeleton-line long"></div>
+                            <div class="skeleton-line medium"></div>
+                            <div class="skeleton-line short"></div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            try {
+                const res = await fetch('/api/history');
+                historyData = await res.json();
+                renderHistory(historyData);
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="history-empty">
+                        <div class="icon">⚠️</div>
+                        <h3>Lỗi tải lịch sử</h3>
+                        <p>Không thể kết nối với máy chủ. Vui lòng thử lại.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderHistory(entries) {
+            const container = document.getElementById('historyContent');
+            const badge = document.getElementById('historyCountBadge');
+
+            if (!entries || entries.length === 0) {
+                badge.style.display = 'none';
+                container.innerHTML = `
+                    <div class="history-empty">
+                        <div class="icon">📭</div>
+                        <h3>Chưa có lịch sử</h3>
+                        <p>Kết quả phân loại sẽ được tự động lưu lại tại đây sau mỗi lần chạy. Hãy thực hiện phân loại đầu tiên!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            badge.style.display = 'inline-block';
+            badge.textContent = `${entries.length} lần chạy`;
+
+            const html = entries.map((entry, idx) => {
+                const date = new Date(entry.created_at);
+                const dateStr = date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const timeStr = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="history-card" id="hcard-${entry.task_id}">
+                        <div class="history-card-top">
+                            <div class="history-card-info">
+                                <div class="history-filename">📄 ${escapeHtml(entry.original_filename)}</div>
+                                <div class="history-meta">
+                                    <span class="history-meta-item"><span class="icon">📅</span> ${dateStr} lúc ${timeStr}</span>
+                                    <span class="history-meta-item"><span class="icon">💬</span> ${entry.total_questions} câu hỏi</span>
+                                    <span class="history-meta-item"><span class="icon">📨</span> ${entry.total_messages} tin nhắn</span>
+                                </div>
+                            </div>
+                            <div class="history-card-actions">
+                                <button class="history-btn primary" onclick="toggleHistoryStats('${entry.task_id}')">📊 Thống kê</button>
+                                <button class="history-btn" onclick="window.location.href='/api/history/${entry.task_id}/classified'">📥 CSV</button>
+                                <button class="history-btn" onclick="window.location.href='/api/history/${entry.task_id}/stats'">📥 Stats</button>
+                                <button class="history-btn danger" onclick="confirmDeleteHistory('${entry.task_id}', '${escapeHtml(entry.original_filename)}')" title="Xóa">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="history-stats-panel" id="hstats-${entry.task_id}"></div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="history-list">${html}</div>`;
+        }
+
+        async function toggleHistoryStats(taskId) {
+            const panel = document.getElementById(`hstats-${taskId}`);
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                return;
+            }
+
+            // Load stats if not already loaded
+            if (!panel.dataset.loaded) {
+                panel.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">Đang tải...</p>';
+                panel.classList.add('open');
+                try {
+                    const res = await fetch(`/api/history/${taskId}`);
+                    const data = await res.json();
+                    if (data.stats && data.stats.length > 0) {
+                        let tableHtml = `<table>
+                            <thead><tr><th>Use Case</th><th>Số lượng</th><th>Tỷ lệ (%)</th></tr></thead>
+                            <tbody>`;
+                        data.stats.forEach(s => {
+                            tableHtml += `<tr>
+                                <td>${escapeHtml(s['Use Case'])}</td>
+                                <td>${s['Số lượng']}</td>
+                                <td>${s['Tỷ lệ (%)']}%</td>
+                            </tr>`;
+                        });
+                        tableHtml += '</tbody></table>';
+                        panel.innerHTML = tableHtml;
+                    } else {
+                        panel.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem;">Không có dữ liệu thống kê.</p>';
+                    }
+                    panel.dataset.loaded = 'true';
+                } catch (err) {
+                    panel.innerHTML = '<p style="color:var(--error);font-size:0.85rem;">Lỗi tải dữ liệu thống kê.</p>';
+                }
+            } else {
+                panel.classList.add('open');
+            }
+        }
+
+        function confirmDeleteHistory(taskId, filename) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal-box">
+                    <h3>🗑️ Xác nhận xóa</h3>
+                    <p>Bạn có chắc chắn muốn xóa lịch sử phân loại của file <strong>${filename}</strong>? Hành động này không thể hoàn tác.</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').remove()">Hủy</button>
+                        <button class="btn btn-danger" id="confirmDeleteBtn">Xóa</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.remove();
+            });
+
+            document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+                try {
+                    const res = await fetch(`/api/history/${taskId}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        overlay.remove();
+                        // Animate card removal
+                        const card = document.getElementById(`hcard-${taskId}`);
+                        if (card) {
+                            card.style.transition = 'all 0.3s ease';
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateX(40px)';
+                            setTimeout(() => {
+                                card.remove();
+                                // Update badge count
+                                const remaining = document.querySelectorAll('.history-card').length;
+                                const badge = document.getElementById('historyCountBadge');
+                                if (remaining === 0) {
+                                    loadHistory(); // re-render empty state
+                                } else {
+                                    badge.textContent = `${remaining} lần chạy`;
+                                }
+                            }, 300);
+                        }
+                        showToast('success', 'Đã xóa lịch sử thành công.');
+                    } else {
+                        showToast('error', 'Không thể xóa. Vui lòng thử lại.');
+                        overlay.remove();
+                    }
+                } catch (err) {
+                    showToast('error', 'Lỗi kết nối máy chủ.');
+                    overlay.remove();
+                }
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
         }
     </script>
 </body>
