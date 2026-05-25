@@ -1,0 +1,49 @@
+Use Case,Số lượng,Tỷ lệ (%)
+Tra cứu & cập nhật CS,394,17.4
+Tình huống chính sách,246,10.86
+Thông tin đơn vị trực thuộc > Tình huống nhiệm vụ đơn vị,236,10.42
+Tra cứu văn bản PL,142,6.27
+Ngoài phạm vi (Từ chối) > Chit-chat ngoài phạm vi,141,6.23
+Thông tin đơn vị trực thuộc,136,6.0
+Thông tin lãnh đạo,130,5.74
+Tin tức & Nội dung khác,117,5.17
+Tình huống TTHC,96,4.24
+Ngoài phạm vi (Từ chối) > Bộ/ngành khác,86,3.8
+Ngoài phạm vi (Từ chối) > Không liên quan tài chính,85,3.75
+Small talk,77,3.4
+Tra cứu TTHC,73,3.22
+Thông tin giới thiệu BTC,55,2.43
+Hướng dẫn cổng DVC,44,1.94
+Phản hồi/Lỗi,29,1.28
+Năng lực BOT,28,1.24
+Đơn vị thuộc Bộ (Tổng cục) > Tình huống nhiệm vụ đơn vị,24,1.06
+VB mới ban hành,22,0.97
+Tình huống nhiệm vụ đơn vị,19,0.84
+Ngoài phạm vi (Từ chối) > Lãnh đạo nhiệm kỳ trước,11,0.49
+Ngoài phạm vi (Từ chối) > Công nghệ sử dụng,9,0.4
+Ngoài phạm vi (Từ chối) > Bạo lực / Nội dung nguy hiểm,9,0.4
+Cảm xúc,8,0.35
+Cập nhật TTHC,7,0.31
+Ngoài phạm vi (Từ chối) > Thông tin nhạy cảm,6,0.26
+Đơn vị thuộc Bộ (Tổng cục),5,0.22
+Ngoài phạm vi (Từ chối) > Guardrails / Chính sách an toàn,3,0.13
+Tra cứu văn bản PL > UC6.1,3,0.13
+Tình huống chính sách > UC5.1,2,0.09
+ERROR,2,0.09
+Ngoài phạm vi (Từ chối) > Tôn giáo,2,0.09
+Ngoài phạm vi (Từ chối) > Phản hồi/Lỗi,2,0.09
+Đơn vị thuộc Bộ (Tổng cục) > Tra cứu văn bản PL,2,0.09
+Tra cứu & cập nhật CS > Phản hồi/Lỗi,1,0.04
+Tra cứu TTHC > Đơn vị thuộc Bộ (Tổng cục),1,0.04
+Ngoài phạm vi (Từ chối) > Ngoài phạm vi tài chính,1,0.04
+Tra cứu TTHC > Thông tin đơn vị trực thuộc,1,0.04
+Tình huống nhiệm vụ đơn vị > Thông tin đơn vị trực thuộc,1,0.04
+Tình huống nhiệm vụ đơn vị > Đơn vị thuộc Bộ (Tổng cục),1,0.04
+Tra cứu & cập nhật CS > Đơn vị thuộc Bộ (Tổng cục),1,0.04
+Tin tức & Nội dung khác > UC7,1,0.04
+Tra cứu & cập nhật CS > UC5.2,1,0.04
+Tra cứu TTHC > UC4.1,1,0.04
+Đơn vị thuộc Bộ (Tổng cục) > Tra cứu & cập nhật CS,1,0.04
+Cảm xúc > Chit-chat ngoài phạm vi,1,0.04
+Cập nhật CS,1,0.04
+Tin tức & Nội dung khác > Đơn vị thuộc Bộ (Tổng cục),1,0.04

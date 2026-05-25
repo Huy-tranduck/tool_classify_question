@@ -158,6 +158,14 @@ def preprocess_data(df):
     
     df = df[(df['Message Content'] != '[get_started]') & (df['Message Content'] != remove_msg)]
 
+    # Loại bỏ conversation chỉ còn bot message (không có user message thực sự)
+    sender_filled = df['Sender Name'].fillna('').astype(str).str.strip()
+    convs_with_user = df.loc[
+        (sender_filled != '') & (sender_filled.str.lower() != 'nan'),
+        'Conversation ID'
+    ].unique()
+    df = df[df['Conversation ID'].isin(convs_with_user)]
+
     df['Time_DT'] = pd.to_datetime(df['Time (UTC)'], format='%d-%m-%Y %H:%M:%S', errors='coerce')
     df = df.sort_values(by=['Conversation ID', 'Time_DT']).drop(columns=['Time_DT']).reset_index(drop=True)
     
